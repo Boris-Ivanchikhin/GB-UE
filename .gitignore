@@ -1,3 +1,9 @@
+/.idea
+/.vs
+/Intermediate
+/DerivedDataCache
+/Saved
+
 # Prerequisites
 *.d
 
