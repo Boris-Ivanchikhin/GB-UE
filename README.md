@@ -1,5 +1,18 @@
-#### Course: C++. Working with Unreal Engine for C++
+#### Course: C++. Working with Unreal Engine for C++  
+#### Lesson 02. The main objects. The life cycle. Moving in the world.  
 
 ***  
+#### Задачи.  
 
-Practical examples using [Unreal Engine]([https://www.unrealengine.com/en-US]).
+1. Перенесите логику передвижения танка в отдельный метод, не забудьте вызвать его в методе Tick();  
+
+2. Попробуйте реализовать движение танка вбок:  
+   a. завяжите движение на команду MoveRight используя клавиши Q для движения влево, а E — вправо;  
+   b. для определения направления движения вправо можно воспользоваться методом GetActorRightVector().  
+
+3. Реализуйте возможность одновременного передвижения вперед-назад и влево-вправо.  
+
+   > Примечание.  
+   > Проект пришлось полностью повторить с нуля на версии движка 5.2.1.  
+   > Изменены классы АTankPawn и ATankPlayerController.  
+
