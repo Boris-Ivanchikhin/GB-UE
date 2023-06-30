@@ -3,11 +3,14 @@
 #pragma once
 
 
+#include "EngineMinimal.h"
 #include "GameFramework/PlayerController.h"
 
 
 #include "CoreMinimal.h"
+#include "Cannon.h"
 #include "GameFramework/Pawn.h"
+
 #include "TankPawn.generated.h"
 
 
@@ -15,8 +18,8 @@ class UStaticMeshComponent;
 class UCameraComponent;
 class USpringArmComponent;
 class ATankPlayerController;
-// class ATankAIController;
-// class ACannon;
+class ATankAIController;
+class ACannon;
 
 
 UCLASS()
@@ -29,13 +32,17 @@ public:
 	ATankPawn();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UStaticMeshComponent* BodyMesh = nullptr;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UStaticMeshComponent* TurretMesh = nullptr;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		USpringArmComponent* SpringArm = nullptr;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UCameraComponent* Camera = nullptr;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UArrowComponent* CannonSetupPoint = nullptr;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement|Speed")
 		float MoveSpeed = 100.0f;
@@ -43,11 +50,8 @@ protected:
 		float RotationSpeed = 100.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement|Speed")
 		float InterpolationKey = 0.1f;
-	
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		USpringArmComponent* SpringArm;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		UCameraComponent* Camera;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret|Speed")
+		float TurretRotationInterpolationKey = 0.5f;
 
 	float TargetForwardAxisValue = 0.0f;
 	float TargetRightAxisValue = 0.0f;
@@ -55,7 +59,15 @@ protected:
 
 	UPROPERTY()
 		ATankPlayerController* TankController = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret|Cannon")
+		TSubclassOf<ACannon> CannonClass;
+	UPROPERTY()
+		ACannon* Cannon;
 	
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+	void SetupCannon();
 
 public:	
 	UFUNCTION()
@@ -63,7 +75,15 @@ public:
 	UFUNCTION()
 		void RotateRight(float AxisValue);
 	UFUNCTION()
+		void Fire();
+	UFUNCTION()
+		void FireSpecial();
+	UFUNCTION()
 		FVector GetTurretForwardVector();
+	UFUNCTION()
+		void RotateTurretTo(FVector TargetPosition);
+
+	//FVector GetEyesPosition();
 	
 
 	// Called every frame
@@ -76,5 +96,6 @@ private:
 
 	void TankMovement(float DeltaTime);
 	void TankRotation(float DeltaTime);
+	void TurretRotation();
 
 };

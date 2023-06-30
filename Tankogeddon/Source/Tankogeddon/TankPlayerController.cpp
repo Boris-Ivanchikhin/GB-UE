@@ -2,8 +2,9 @@
 
 
 #include "TankPlayerController.h"
-#include "DrawDebugHelpers.h"
 #include "TankPawn.h"
+
+#include "DrawDebugHelpers.h"
 #include "Engine/Engine.h"
 
 
@@ -18,7 +19,8 @@ void ATankPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 	InputComponent->BindAxis("MoveForward", this, &ATankPlayerController::MoveForward);
 	InputComponent->BindAxis("RotateRight", this, &ATankPlayerController::RotateRight);
-	//InputComponent->BindAction("Fire", IE_Pressed, this, &ATankPlayerController::Fire);
+	InputComponent->BindAction("Fire", IE_Pressed, this, &ATankPlayerController::Fire);
+	InputComponent->BindAction("FireSpecial", IE_Pressed, this, &ATankPlayerController::FireSpecial);
 	//InputComponent->BindAxis("TurretRotationRight", this, &ATankPlayerController::RotateTurretRight);
 
 }
@@ -32,7 +34,7 @@ void ATankPlayerController::Tick(float DeltaTime)
 	FVector dir = MousePos - pawnPos;
 	dir.Normalize();
 	MousePos = pawnPos + dir * 1000;
-	//DrawDebugLine(GetWorld(), pawnPos, MousePos, FColor::Green, false, 0.1f, 0, 5);
+	DrawDebugLine(GetWorld(), pawnPos, MousePos, FColor::Green, false, 0.1f, 0, 5);
 }
 
 void ATankPlayerController::BeginPlay()
@@ -58,9 +60,14 @@ void ATankPlayerController::RotateTurretRight(float AxisValue)
 {
 	GEngine->AddOnScreenDebugMessage(5, 1, FColor::Blue, FString::SanitizeFloat(AxisValue));
 }
+*/
 
 void ATankPlayerController::Fire()
 {
 	TankPawn->Fire();
 }
-*/
+
+void ATankPlayerController::FireSpecial()
+{
+	TankPawn->FireSpecial();
+}
