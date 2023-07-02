@@ -68,11 +68,13 @@ void ACannon::Fire()
 	if (Type == ECannonType::FireProjectile)
 	{
 		GEngine->AddOnScreenDebugMessage(10, 1, FColor::Green, "Fire - projectile");
-		/*
+		
 		FTransform projectileTransform(ProjectileSpawnPoint->GetComponentRotation(), ProjectileSpawnPoint->GetComponentLocation(), FVector(1));
 
 		//AProjectile* projectile = GetWorld()->SpawnActorDeferred<AProjectile>(ProjectileClass, projectileTransform, this);
-		AProjectile* projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, ProjectileSpawnPoint->GetComponentLocation(), ProjectileSpawnPoint->GetComponentRotation());
+		AProjectile* projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, 
+										ProjectileSpawnPoint->GetComponentLocation(), 
+										ProjectileSpawnPoint->GetComponentRotation());
 		if (projectile)
 		{
 			// ....
@@ -81,12 +83,13 @@ void ACannon::Fire()
 			projectile->Start();
 
 		}
-		*/
+		
 	}
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(10, 1, FColor::Green, "Fire - trace");
-		/*
+		
+		
 		FHitResult hitResult;
 		FCollisionQueryParams traceParams = FCollisionQueryParams(FName(TEXT("FireTrace")), true, this);
 		traceParams.bTraceComplex = true;
@@ -97,9 +100,9 @@ void ACannon::Fire()
 		if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECollisionChannel::ECC_Visibility, traceParams))
 		{
 			DrawDebugLine(GetWorld(), start, hitResult.Location, FColor::Red, false, 0.5f, 0, 5);
-			if (hitResult.Actor.Get())
+			if (hitResult.GetActor())
 			{
-				hitResult.Actor.Get()->Destroy();
+				hitResult.GetActor()->Destroy();
 			}
 			// IDamageTaker * damageTakerActor = Cast<IDamageTaker>(hitResult.Actor);
 			// if(damageTakerActor)
@@ -116,7 +119,8 @@ void ACannon::Fire()
 		{
 			DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 0.5f, 0, 5);
 		}
-		*/
+		
+		
 	}
 
 	GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, this, &ACannon::Reload, 1 / FireRate, false);
@@ -132,6 +136,11 @@ void ACannon::FireSpecial()
 bool ACannon::IsReadyToFire()
 {
 	return (ReadyToFire && count > 0);
+}
+
+void ACannon::AddAmmo(int _count)
+{
+	count += _count;
 }
 
 void ACannon::Reload()

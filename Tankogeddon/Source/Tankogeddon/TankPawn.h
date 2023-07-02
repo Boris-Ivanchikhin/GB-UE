@@ -64,10 +64,11 @@ protected:
 	UPROPERTY()
 		ACannon* Cannon;
 	
+	void SetupCannon();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	void SetupCannon();
+	
 
 public:	
 	UFUNCTION()
@@ -83,19 +84,24 @@ public:
 	UFUNCTION()
 		void RotateTurretTo(FVector TargetPosition);
 
-	//FVector GetEyesPosition();
-	
-
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void SetupCannon(TSubclassOf<ACannon> NewCannonClass);
+
+	UFUNCTION()
+	ACannon* GetCannon();
+
 private:
 
+	UFUNCTION()
 	void TankMovement(float DeltaTime);
+	UFUNCTION()
 	void TankRotation(float DeltaTime);
+	UFUNCTION()
 	void TurretRotation();
 
 };

@@ -163,6 +163,17 @@ void ATankPawn::SetupCannon()
 	Cannon->AttachToComponent(CannonSetupPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
+void ATankPawn::SetupCannon(TSubclassOf<ACannon> NewCannonClass)
+{
+	CannonClass = NewCannonClass;
+	SetupCannon();
+}
+
+ACannon* ATankPawn::GetCannon()
+{
+	return Cannon;
+}
+
 
 void ATankPawn::Fire()
 {
