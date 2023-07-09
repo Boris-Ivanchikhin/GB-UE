@@ -4,7 +4,7 @@
 #include "Projectile.h"
 #include "Projectile.h"
 
-//#include "DamageTaker.h"
+#include "DamageTaker.h"
 #include "Components/StaticMeshComponent.h"
 #include "TimerManager.h"
 
@@ -36,10 +36,8 @@ void AProjectile::OnMeshOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 {
 	UE_LOG(LogTemp, Warning, TEXT("Projectile %s collided with %s. "), *GetName(), *OtherActor->GetName());
 
-	OtherActor->Destroy();
-	Destroy();
 
-	/*
+	
 	AActor* owner = GetOwner();
 	AActor* ownerByOwner = owner != nullptr ? owner->GetOwner() : nullptr;
 	if (OtherActor != owner && OtherActor != ownerByOwner)
@@ -56,8 +54,9 @@ void AProjectile::OnMeshOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 		}
 		else
 		{
-			//OtherActor->Destroy();
+			OtherActor->Destroy();
 
+			/*
 			UPrimitiveComponent* mesh = Cast<UPrimitiveComponent>(OtherActor->GetRootComponent());
 			if (mesh)
 			{
@@ -70,14 +69,14 @@ void AProjectile::OnMeshOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 					mesh->AddImpulse(forceVector * PushForce, NAME_None, true);
 				}
 			}
+			*/
 		}
 
 		Destroy();
 		//UE_LOG(LogTemp, Warning, TEXT("Projectile destroyed"));
 	}
-	// OtherActor->Destroy();
-	// Destroy();
-	*/
+
+	
 }
 
 void AProjectile::Move()

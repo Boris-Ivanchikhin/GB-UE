@@ -8,6 +8,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "TimerManager.h"
 #include "Engine/Engine.h"
+#include "DamageTaker.h"
 
 ACannon::ACannon()
 {
@@ -104,16 +105,17 @@ void ACannon::Fire()
 			{
 				hitResult.GetActor()->Destroy();
 			}
-			// IDamageTaker * damageTakerActor = Cast<IDamageTaker>(hitResult.Actor);
-			// if(damageTakerActor)
-			// {
-			// 	FDamageData damageData;
-			// 	damageData._damageValue = _fireDamage;
-			// 	damageData._instigator = this;
-			// 	damageData._damageMaker = this;
-			//
-			// 	damageTakerActor->TakeDamage(damageData);
-			// }
+
+			IDamageTaker * damageTakerActor = Cast<IDamageTaker>(hitResult.GetActor());
+			if(damageTakerActor)
+			{
+				FDamageData damageData;
+				damageData.DamageValue = FireDamage;
+			 	damageData.Instigator = this;
+			 	damageData.DamageMaker = this;
+			
+			 	damageTakerActor->TakeDamage(damageData);
+			}
 		}
 		else
 		{
