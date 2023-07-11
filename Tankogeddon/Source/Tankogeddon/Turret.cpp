@@ -14,8 +14,7 @@
 // Sets default values
 ATurret::ATurret()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	//PrimaryActorTick.bCanEverTick = true;
 
 	BodyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Turret body"));
 	RootComponent = BodyMesh;
@@ -64,7 +63,8 @@ void ATurret::BeginPlay()
 	PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 
 	FTimerHandle _targetingTimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(_targetingTimerHandle, this, &ATurret::Targeting, TargetingRate, true, TargetingRate);
+	GetWorld()->GetTimerManager().SetTimer(_targetingTimerHandle, this, &ATurret::Targeting,
+											TargetingRate, true, TargetingRate);
 
 	UStaticMesh* turretMeshTemp = LoadObject<UStaticMesh>(this, *TurretMeshPath);
 	if (turretMeshTemp)
@@ -74,14 +74,17 @@ void ATurret::BeginPlay()
 	if (bodyMeshTemp)
 		BodyMesh->SetStaticMesh(bodyMeshTemp);
 	
+	// Запуск таймера при начале игры для стрельбы и переключения типов стрельбы
+	StartFiringTimer();
 }
 
-// Called every frame
+/*
 void ATurret::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
+*/
 
 void ATurret::Destroyed()
 {
@@ -104,12 +107,12 @@ void ATurret::Targeting()
 
 void ATurret::RotateToPlayer()
 {
+
 	FRotator targetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), PlayerPawn->GetActorLocation());
 	FRotator currRotation = TurretMesh->GetComponentRotation();
 	targetRotation.Pitch = currRotation.Pitch;
 	targetRotation.Roll = currRotation.Roll;
 	TurretMesh->SetWorldRotation(FMath::Lerp(currRotation, targetRotation, TargetingSpeed));
-
 
 }
 
@@ -132,6 +135,9 @@ bool ATurret::CanFire()
 	if (!PlayerPawn)
 		return false;
 
+	if (!IsPlayerSeen())
+		return false;
+
 	FVector targetingDir = TurretMesh->GetForwardVector();
 	FVector dirToPlayer = PlayerPawn->GetActorLocation() - GetActorLocation();
 	dirToPlayer.Normalize();
@@ -146,6 +152,24 @@ void ATurret::Fire()
 		Cannon->Fire();
 }
 
+void ATurret::Die()
+{
+	Destroy();
+	StopFiringTimer();
+}
+
+void ATurret::TakeDamage(FDamageData DamageData)
+{
+	HealthComponent->TakeDamage(DamageData);
+	UE_LOG(LogTemp, Warning, TEXT("Turret %s taked damage:%f "), *GetName(), DamageData.DamageValue);
+}
+
+void ATurret::DamageTaked(float DamageValue)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Turret %s taked damage:%f Health:%f"), *GetName(), DamageValue, HealthComponent->GetHealth());
+}
+
+/*
 void ATurret::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -158,20 +182,50 @@ void ATurret::PostInitializeComponents()
 	// if(bodyMeshTemp)
 	// 	BodyMesh->SetStaticMesh(bodyMeshTemp);
 }
+*/
 
-
-void ATurret::Die()
+bool ATurret::IsPlayerSeen()
 {
-	Destroy();
+	FVector playerPos = PlayerPawn->GetActorLocation();
+	FVector eyesPos = GetEyesPosition();
+	FHitResult hitResult;
+	FCollisionQueryParams traceParams =
+		FCollisionQueryParams(FName(TEXT("FireTrace")), true, this);
+	traceParams.bTraceComplex = true;
+	//traceParams.AddIgnoredActor(TankPawn);
+	traceParams.bReturnPhysicalMaterial = false;
+	if (GetWorld()->LineTraceSingleByChannel(hitResult, eyesPos, playerPos,
+		ECollisionChannel::ECC_Visibility, traceParams))
+	{
+		if (hitResult.GetActor())
+		{
+			DrawDebugLine(GetWorld(), eyesPos, hitResult.Location, FColor::Purple,
+				false, 0.5f, 0, 10);
+			return hitResult.GetActor() == PlayerPawn;
+		}
+	}
+	DrawDebugLine(GetWorld(), eyesPos, playerPos, FColor::Cyan, false, 0.5f, 0, 10);
+	return false;
 }
 
-void ATurret::TakeDamage(FDamageData DamageData)
+
+
+void ATurret::SwitchFireType()
 {
-	HealthComponent->TakeDamage(DamageData);
-	UE_LOG(LogTemp, Warning, TEXT("Turret %s taked damage:%f "), *GetName(), DamageData.DamageValue);
+	if (Cannon)
+	{
+		StartFiringTimer();
+		Cannon->SwitchFireType();
+	}
+		
 }
 
-void ATurret::DamageTaked(float DamageValue)
+void ATurret::StartFiringTimer()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Turret %s taked damage:%f Health:%f"), *GetName(), DamageValue, HealthComponent->GetHealth());
+	GetWorldTimerManager().SetTimer(FiringTimerHandle, this, &ATurret::SwitchFireType, TypeOfFireDuration, false);
+}
+
+void ATurret::StopFiringTimer()
+{
+	GetWorldTimerManager().ClearTimer(FiringTimerHandle);
 }

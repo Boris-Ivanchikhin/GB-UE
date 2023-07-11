@@ -7,12 +7,11 @@
 #include "Projectile.h"
 
 
-
-//#include "Camera/CameraShake.h"
 #include "Components/AudioComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/ForceFeedbackEffect.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Camera/CameraShakeBase.h"
 
 #include "Cannon.generated.h"
 
@@ -34,19 +33,20 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UArrowComponent* ProjectileSpawnPoint = nullptr;
 
-	/*
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 		UParticleSystemComponent* ShootEffect;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 		UAudioComponent* AudioEffect;
 
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
 		UForceFeedbackEffect* ShootForceEffect;
 
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<UCameraShake> ShootShake;
-	*/
+		TSubclassOf<UCameraShakeBase> ShootShake;
+	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
 		float FireRate = 1;
@@ -76,6 +76,8 @@ public:
 
 	bool IsReadyToFire();
 	void AddAmmo(int _count);
+
+	void SwitchFireType();
 
 protected:
 	virtual void BeginPlay() override;

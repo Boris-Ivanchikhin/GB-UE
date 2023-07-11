@@ -10,7 +10,7 @@
 #include "Cannon.h"
 #include "DamageTaker.h"
 #include "HealthComponent.h"
-
+#include "Components/ArrowComponent.h"
 
 #include "Turret.generated.h"
 
@@ -47,29 +47,45 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Targeting")
 		float TargetingRange = 1000;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Targeting")
 		float TargetingSpeed = 0.1f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Targeting")
 		float TargetingRate = 0.005f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Targeting")
 		float Accurency = 10;
+
+
+	// Добавьте переменные для управления временем и типом стрельбы
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Firing")
+		float TypeOfFireDuration = 5.0f;
+
+	FTimerHandle FiringTimerHandle;
+
 
 	const FString BodyMeshPath = "StaticMesh'/Game/CSC/Meshes/SM_CSC_Tower1.SM_CSC_Tower1'";
 	const FString TurretMeshPath = "StaticMesh'/Game/CSC/Meshes/SM_CSC_Gun1.SM_CSC_Gun1'";
 
 public:
+
 	ATurret();
 	
 	UFUNCTION()
 		void TakeDamage(FDamageData DamageData);
 	
 
-	virtual void PostInitializeComponents() override;
+	//virtual void PostInitializeComponents() override;
+	FVector GetEyesPosition()
+	{
+		return CannonSetupPoint->GetComponentLocation();
+	};
 
 protected:
 
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	//virtual void Tick(float DeltaTime) override;
 
 	virtual void BeginPlay() override;
 
@@ -90,5 +106,15 @@ protected:
 	
 	UFUNCTION()
 		void DamageTaked(float DamageValue);
-	
+
+	bool IsPlayerSeen();
+
+
+
+	void SwitchFireType();
+
+	void StartFiringTimer();
+
+	void StopFiringTimer();
+
 };

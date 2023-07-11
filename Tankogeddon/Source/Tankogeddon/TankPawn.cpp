@@ -83,6 +83,7 @@ void ATankPawn::TankRotation(float DeltaTime)
 	SetActorRotation(newRotation);
 }
 
+/*
 void ATankPawn::TurretRotation()
 {
 	// Turret rotation
@@ -90,13 +91,15 @@ void ATankPawn::TurretRotation()
 	{
 		FVector mousePos = TankController->GetMousePos();
 		RotateTurretTo(mousePos);
-		// FRotator targetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), mousePos);
-		// FRotator currRotation = TurretMesh->GetComponentRotation();
-		// targetRotation.Pitch = currRotation.Pitch;
-		// targetRotation.Roll = currRotation.Roll;
-		// TurretMesh->SetWorldRotation(FMath::Lerp(currRotation, targetRotation, TurretRotationInterpolationKey));
+
+		FRotator targetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), mousePos);
+		FRotator currRotation = TurretMesh->GetComponentRotation();
+		targetRotation.Pitch = currRotation.Pitch;
+		targetRotation.Roll = currRotation.Roll;
+		TurretMesh->SetWorldRotation(FMath::Lerp(currRotation, targetRotation, TurretRotationInterpolationKey));
 	}
 }
+*/
 
 // Called every frame
 void ATankPawn::Tick(float DeltaTime)
@@ -107,7 +110,14 @@ void ATankPawn::Tick(float DeltaTime)
 
 	TankRotation(DeltaTime);
 
-	TurretRotation();
+	//TurretRotation();
+
+	// Turret rotation
+	if (TankController)
+	{
+		FVector mousePos = TankController->GetMousePos();
+		RotateTurretTo(mousePos);
+	}
 
 }
 
@@ -121,14 +131,6 @@ void ATankPawn::RotateTurretTo(FVector TargetPosition)
 	TurretMesh->SetWorldRotation(FMath::Lerp(currRotation, targetRotation, TurretRotationInterpolationKey));
 }
 
-
-
-/*
-FVector ATankPawn::GetEyesPosition()
-{
-	return CannonSetupPoint->GetComponentLocation();
-}
-*/
 
 
 // Called to bind functionality to input
@@ -217,3 +219,21 @@ void ATankPawn::DamageTaked(float DamageValue)
 {
 	UE_LOG(TankLog, Warning, TEXT("Tank %s taked damage:%f Health:%f"), *GetName(), DamageValue, HealthComponent->GetHealth());
 }
+
+FVector ATankPawn::GetEyesPosition()
+{
+	return CannonSetupPoint->GetComponentLocation();
+}
+
+/*
+TArray<FVector> ATankPawn::GetPatrollingPoints()
+{
+	TArray<FVector> points;
+	for (ATargetPoint* point : PatrollingPoints)
+	{
+		points.Add(point->GetActorLocation());
+	}
+
+	return points;
+}
+*/

@@ -10,6 +10,7 @@
 #include "GameFramework/Pawn.h"
 #include "DamageTaker.h"
 #include "HealthComponent.h"
+#include "Engine/TargetPoint.h"
 
 #include "TankPawn.generated.h"
 
@@ -26,10 +27,6 @@ UCLASS()
 class TANKOGEDDON_API ATankPawn : public APawn, public IDamageTaker
 {
 	GENERATED_BODY()
-
-public:
-	// Sets default values for this pawn's properties
-	ATankPawn();
 
 protected:
 
@@ -78,6 +75,19 @@ protected:
 	
 	UPROPERTY()
 		ACannon* Cannon;
+
+public:
+	// Sets default values for this pawn's properties
+	ATankPawn();
+
+protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Move params|Patrol points", Meta = (MakeEditWidget = true))
+		TArray<FVector> PatrollingPoints;
+	// int32 _currentPatrolPointIndex = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Move params|Accurency")
+		float MovementAccurency = 50;
 	
 	void SetupCannon();
 
@@ -89,6 +99,15 @@ protected:
 
 	UFUNCTION()
 		void DamageTaked(float DamageValue);
+
+	UFUNCTION()
+		void TankMovement(float DeltaTime);
+
+	UFUNCTION()
+		void TankRotation(float DeltaTime);
+
+	//UFUNCTION()
+	//	void TurretRotation();
 
 public:	
 
@@ -107,6 +126,8 @@ public:
 	UFUNCTION()
 		void TakeDamage(FDamageData DamageData);
 
+	FVector GetEyesPosition();
+
 	UFUNCTION()
 		FVector GetTurretForwardVector();
 
@@ -122,17 +143,19 @@ public:
 	void SetupCannon(TSubclassOf<ACannon> NewCannonClass);
 
 	UFUNCTION()
-	ACannon* GetCannon();
+		ACannon* GetCannon();
 
-private:
-
-	UFUNCTION()
-	void TankMovement(float DeltaTime);
 
 	UFUNCTION()
-	void TankRotation(float DeltaTime);
-	
+		TArray<FVector> GetPatrollingPoints()
+	{
+		return PatrollingPoints;
+	};
+
 	UFUNCTION()
-	void TurretRotation();
+		float GetMovementAccurency()
+	{
+		return MovementAccurency;
+	};
 
 };
