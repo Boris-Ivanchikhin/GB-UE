@@ -83,7 +83,7 @@ public:
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Move params|Patrol points", Meta = (MakeEditWidget = true))
-		TArray<FVector> PatrollingPoints;
+		TArray<ATargetPoint*> PatrollingPoints;
 	// int32 _currentPatrolPointIndex = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Move params|Accurency")
@@ -145,12 +145,10 @@ public:
 	UFUNCTION()
 		ACannon* GetCannon();
 
+	void SetPatrollingPoints(TArray<ATargetPoint*> NewPatrollingPoints);
 
 	UFUNCTION()
-		TArray<FVector> GetPatrollingPoints()
-	{
-		return PatrollingPoints;
-	};
+		TArray<FVector> GetPatrollingPoints();
 
 	UFUNCTION()
 		float GetMovementAccurency()
