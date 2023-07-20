@@ -31,17 +31,61 @@ void AProjectile::Start()
 		MoveRate, true, MoveRate);
 }
 
+
+
+void AProjectile::CheckDamege(AActor* _OtherActor, AActor* _owner)
+{
+	IDamageTaker* damageTakerActor = Cast<IDamageTaker>(_OtherActor);
+	if (damageTakerActor)
+	{
+		FDamageData damageData;
+		damageData.DamageValue = Damage;
+		damageData.Instigator = _owner;
+		damageData.DamageMaker = this;
+
+		damageTakerActor->TakeDamage(damageData);
+	}
+}
+
+void AProjectile::AddEffect(AActor* _OtherActor)
+{
+	IDamageTaker* damageTakerActor = Cast<IDamageTaker>(_OtherActor);
+	if (!damageTakerActor)
+	{
+		//OtherActor->Destroy();
+		UPrimitiveComponent* mesh = Cast<UPrimitiveComponent>(_OtherActor->GetRootComponent());
+		if (mesh)
+		{
+			if (mesh->IsSimulatingPhysics())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Simulate physics enabled %s. "), *_OtherActor->GetName());
+				FVector forceVector = _OtherActor->GetActorLocation() - GetActorLocation();
+				forceVector.Normalize();
+				//mesh->AddForce(forceVector * PushForce);
+				mesh->AddImpulse(forceVector * PushForce, NAME_None, true);
+			}
+		}
+	}
+
+}
+
+
+
 void AProjectile::OnMeshOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Projectile %s collided with %s. "), *GetName(), *OtherActor->GetName());
-
-
 	
 	AActor* owner = GetOwner();
 	AActor* ownerByOwner = owner != nullptr ? owner->GetOwner() : nullptr;
+
 	if (OtherActor != owner && OtherActor != ownerByOwner)
 	{
+		
+		CheckDamege(OtherActor, owner);
+		AddEffect(OtherActor);
+
+		/*
 		IDamageTaker* damageTakerActor = Cast<IDamageTaker>(OtherActor);
 		if (damageTakerActor)
 		{
@@ -52,11 +96,10 @@ void AProjectile::OnMeshOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 
 			damageTakerActor->TakeDamage(damageData);
 		}
+		
 		else
 		{
-			OtherActor->Destroy();
-
-			/*
+			//OtherActor->Destroy();
 			UPrimitiveComponent* mesh = Cast<UPrimitiveComponent>(OtherActor->GetRootComponent());
 			if (mesh)
 			{
@@ -69,13 +112,17 @@ void AProjectile::OnMeshOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 					mesh->AddImpulse(forceVector * PushForce, NAME_None, true);
 				}
 			}
-			*/
+			
 		}
+		*/
 
 		Destroy();
+
+		if (HasExplosion)
+			Explode();
+
 		//UE_LOG(LogTemp, Warning, TEXT("Projectile destroyed"));
 	}
-
 	
 }
 
@@ -100,3 +147,68 @@ void AProjectile::Tick(float DeltaTime)
 
 }
 */
+
+
+void AProjectile::Explode()
+{
+    FVector startPos = GetActorLocation();
+    FVector endPos = startPos + FVector(0.1f);
+
+    FCollisionShape Shape = FCollisionShape::MakeSphere(ExplodeRadius);
+    FCollisionQueryParams params = FCollisionQueryParams::DefaultQueryParam;
+    params.AddIgnoredActor(this);
+    params.bTraceComplex = true;
+    params.TraceTag = "Explode Trace";
+    TArray<FHitResult> AttackHit;
+
+    FQuat Rotation = FQuat::Identity;
+
+    bool sweepResult = GetWorld()->SweepMultiByChannel
+    (
+        AttackHit,
+        startPos,
+        endPos,
+        Rotation,
+        ECollisionChannel::ECC_Visibility,
+        Shape,
+        params
+    );
+
+    GetWorld()->DebugDrawTraceTag = "Explode Trace";
+
+    if (sweepResult)
+    {
+        for (FHitResult hitResult : AttackHit)
+        {
+            AActor* otherActor = hitResult.GetActor();
+            if (!otherActor)
+                continue;
+
+            IDamageTaker* damageTakerActor = Cast<IDamageTaker>(otherActor);
+            if (damageTakerActor)
+            {
+                FDamageData damageData;
+                damageData.DamageValue = Damage;
+                damageData.Instigator = GetOwner();
+                damageData.DamageMaker = this;
+
+                damageTakerActor->TakeDamage(damageData);
+            }
+            else
+            {
+                UPrimitiveComponent* mesh = Cast<UPrimitiveComponent>(otherActor->GetRootComponent());
+                if (mesh)
+                {
+                    if (mesh->IsSimulatingPhysics())
+                    {
+                        FVector forceVector = otherActor->GetActorLocation() - GetActorLocation();
+                        forceVector.Normalize();
+                        //mesh->AddImpulse(forceVector * PushForce, NAME_None, true);
+                        mesh->AddForce(forceVector * PushForce, NAME_None, true);
+                    }
+                }
+            }
+
+        }
+    }
+}

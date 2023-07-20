@@ -28,6 +28,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Damage")
 		float PushForce = 100000;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion")
+		bool HasExplosion = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
+		float ExplodeRadius = 1000.0f;
+
 	FTimerHandle MovementTimerHandle;
 
 public:
@@ -35,8 +41,7 @@ public:
 	// Sets default values for this actor's properties
 	AProjectile();
 
-	UFUNCTION()
-		virtual void Start();
+	virtual void Start();
 
 protected:
 
@@ -52,5 +57,14 @@ protected:
 
 	UFUNCTION()
 		virtual void Move();
+
+	UFUNCTION()
+		virtual void Explode();
+
+	UFUNCTION()
+		void CheckDamege(AActor* _OtherActor, AActor* _owner);
+
+	UFUNCTION()
+		void AddEffect(AActor* _OtherActor);
 
 };
